@@ -16,4 +16,6 @@
     <string name="title_activity_address_book">AddressBookActivity</string>
     <string name="title_activity_task">TaskActivity</string>
     <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_teams">TeamsActivity</string>
+    <string name="title_activity_main">MainActivity</string>
 </resources>
