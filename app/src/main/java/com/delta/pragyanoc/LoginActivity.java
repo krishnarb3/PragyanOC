@@ -1,6 +1,7 @@
 package com.delta.pragyanoc;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,6 +17,8 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,6 +39,7 @@ public class LoginActivity extends AppCompatActivity {
     Button button;
     Context context;
     String regId;
+    String user_secret;
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     @Override
@@ -54,22 +58,114 @@ public class LoginActivity extends AppCompatActivity {
                 RegisterUser(username.getText().toString(),password.getText().toString());
             }
         });
+        SharedPreferences prefs = getSharedPreferences("UserDetails",
+                Context.MODE_PRIVATE);
+        if((!prefs.getString("user_roll","").equals(""))&&(!prefs.getString("user_gcmid","").equals("")&&!prefs.getString("user_secret","").equals(""))) {
+            Intent intent = new Intent(LoginActivity.this,AddressBookActivity.class);
+            startActivity(intent);
+        }
     }
 
     // When Register Me button is clicked
     public void RegisterUser(String userRoll,String userPassword) {
+        String login;
         if (!TextUtils.isEmpty(userRoll)) {
             if (checkPlayServices()) {
-                new AsyncRegisterWithGCM().execute(userRoll);
+                try {
+                    login = new AsyncLoginTask().execute(userRoll,userPassword).get();
+                    login = login.substring(4,login.length());
+                    JSONObject loginJSON = new JSONObject(login);
+                    int status = (int)loginJSON.get("status_code");
+                    user_secret = loginJSON.get("message").toString();
+                    Log.d(Utilities.LOGGING,user_secret);
+                    if(status==200) {
+                        SharedPreferences prefs = getSharedPreferences("UserDetails",
+                                Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString("user_secret",user_secret);
+                        editor.commit();
+                        new AsyncRegisterWithGCM().execute(userRoll);
+                    }
+                } catch (Exception e) {
+                    Log.d(Utilities.LOGGING,e+"");
+                }
+
             }
         }
-        // When Email is invalid
         else {
-            Toast.makeText(context, "Please enter valid email",
+            Toast.makeText(context, "Please enter valid user Roll",
                     Toast.LENGTH_LONG).show();
         }
     }
+    public class AsyncLoginTask extends AsyncTask<String,Void,String> {
+        String user_roll,user_password;
+        String result;
+        @Override
+        protected String doInBackground(String... strings) {
+            user_roll = strings[0];
+            user_password = strings[1];
+            URL url;
+            try {
+                url = new URL(Utilities.getLoginUrl());
+            }
+            catch(MalformedURLException e) {
+                throw new IllegalArgumentException("invalid url: " + Utilities.getGcmUrl());
+            }
+            StringBuilder bodyBuilder = new StringBuilder();
+            Map<String, String> params = new HashMap<>();
+            params.put("user_roll",user_roll);
+            params.put("user_password",user_password);
+            Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
+            while(iterator.hasNext()) {
+                Map.Entry<String, String> param = iterator.next();
+                bodyBuilder.append(param.getKey()).append('=')
+                        .append(param.getValue());
+                if (iterator.hasNext()) {
+                    bodyBuilder.append('&');
+                }
+            }
+            String body = bodyBuilder.toString();
+            Log.v(Utilities.LOGGING,"Posting '"+body+"' to "+url);
+            byte[] bytes = body.getBytes();
+            HttpURLConnection conn = null;
+            try {
+                Log.d("URL", "> " + url);
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                conn.setUseCaches(false);
+                conn.setFixedLengthStreamingMode(bytes.length);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type",
+                        "application/x-www-form-urlencoded;charset=UTF-8");
+                OutputStream out = conn.getOutputStream();
+                out.write(bytes);
+                out.close();
+                InputStream in = conn.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                CharSequence charSequence = "status";
+                String line = null;
+                try {
+                    while ((line = reader.readLine()) != null) {
+                        result = result + line;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
 
+            catch(Exception e) {
+                Log.e(Utilities.LOGGING, e + "");
+            }
+            Log.d(Utilities.LOGGING,result);
+            return result;
+        }
+    }
     public class AsyncRegisterWithGCM extends AsyncTask<String,Void,String> {
         String emailId;
         @Override
@@ -84,6 +180,7 @@ public class LoginActivity extends AppCompatActivity {
                 regId = gcmObj
                         .register(Utilities.getGoogleProjId());
                 msg = "Registration ID :" + regId;
+                Log.d(Utilities.LOGGING,msg);
 
             } catch (IOException ex) {
                 msg = "Error :" + ex.getMessage();
@@ -105,6 +202,7 @@ public class LoginActivity extends AppCompatActivity {
                         "Reg ID Creation Failed.nnEither you haven't enabled Internet or GCM server is busy right now. Make sure you enabled Internet and try registering again after some time."
                                 + msg, Toast.LENGTH_LONG).show();
             }
+
         }
     }
 
@@ -112,14 +210,15 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("UserDetails",
                 Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
+        Log.d(Utilities.LOGGING,"SharedPref\n"+user_roll+","+user_gcmid);
         editor.putString("user_roll", user_roll);
         editor.putString("user_gcmid", user_gcmid);
         editor.commit();
-        storeRegIdinServer(user_roll, user_gcmid);
+        storeRegIdinServer(user_roll, user_gcmid, user_secret);
     }
-    private void storeRegIdinServer(String user_roll,String user_gcmid) {
+    private void storeRegIdinServer(String user_roll,String user_gcmid,String user_secret) {
 
-        class AsyncStoreGCMtoServer extends AsyncTask<String, Void, Void> {
+        new AsyncTask<String, Void, Void>() {
             String result;
             String user_roll,user_gcmid,user_secret;
             @Override
@@ -188,7 +287,7 @@ public class LoginActivity extends AppCompatActivity {
             }
                 return null;
         }
-    }
+    }.execute(user_roll,user_gcmid,user_secret);
     }
     private boolean checkPlayServices() {
         int resultCode = GooglePlayServicesUtil
