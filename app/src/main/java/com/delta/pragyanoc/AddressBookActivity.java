@@ -52,7 +52,7 @@ public class AddressBookActivity extends AppCompatActivity {
              //profileDetails = profileDetails.substring(4, profileDetails.length());
              Log.d(Utilities.LOGGING + "profileDetails", profileDetails);
              JSONObject profileJSON = new JSONObject(profileDetails);
-             String user_type =profileJSON.getString("user_type");
+             String user_type =((JSONObject)profileJSON.get("message")).getString("user_type");
              editor.putString("user_type",user_type);
              editor.commit();
             if(profileDetails!=null&&!profileDetails.equals(""))
@@ -63,6 +63,7 @@ public class AddressBookActivity extends AppCompatActivity {
                 editor.putString("allprofileDetails",allprofileDetails);
             editor.commit();
             JSONObject allprofileJSON = new JSONObject(allprofileDetails);
+            Log.d(Utilities.LOGGING,allprofileJSON.toString());
             JSONArray profileArrays = allprofileJSON.getJSONArray("message");
             for(int i=0;i<profileArrays.length();i++) {
                 JSONObject jsonObject = (JSONObject)profileArrays.get(i);

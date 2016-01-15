@@ -29,7 +29,7 @@ import java.util.Map;
 
 public class TaskActivity extends AppCompatActivity {
 
-    User member;
+    ArrayList<User> member;
     String user_target_roll;
     String user_type;
     String result;
@@ -46,8 +46,8 @@ public class TaskActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Bundle bundle = getIntent().getExtras();
-        member = bundle.getParcelable("memberName");
-        user_target_roll = member.user_roll;
+        member = bundle.getParcelableArrayList("memberName");
+        user_target_roll = member.get(0).user_roll;
         prefs = getSharedPreferences("UserDetails",
                 Context.MODE_PRIVATE);
         profile = prefs.getString("profileDetails","");
@@ -76,8 +76,10 @@ public class TaskActivity extends AppCompatActivity {
         } catch(Exception e) {
             Log.e(Utilities.LOGGING,e+"");
         }
-        adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,tasksArrayList);
-        listViewTasks.setAdapter(adapter);
+        if(tasksArrayList!=null) {
+            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, tasksArrayList);
+            listViewTasks.setAdapter(adapter);
+        }
         try {
             JSONObject tasksJSON = new JSONObject(result);
             JSONArray tasks = tasksJSON.getJSONArray("message");

@@ -19,4 +19,6 @@
     <string name="title_activity_teams">TeamsActivity</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_task_acc2_team">TaskAcc2TeamActivity</string>
+    <string name="title_activity_chat">ChatActivity</string>
+    <string name="title_activity_new_task">NewTaskActivity</string>
 </resources>

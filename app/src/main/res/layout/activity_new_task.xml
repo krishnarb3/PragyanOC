@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.delta.pragyanoc.TaskAcc2TeamActivity">
+    tools:context="com.delta.pragyanoc.NewTaskActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -22,21 +22,14 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_task_acc2_team"/>
+    <include layout="@layout/content_new_task"/>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_new_message"
+        android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:src="@android:drawable/ic_dialog_email"/>
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_new_task"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_menu_add"/>
 
 </android.support.design.widget.CoordinatorLayout>

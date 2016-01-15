@@ -11,7 +11,25 @@ public class Utilities {
     private static String ALL_PROFILE_URL = "http://api.pragyan.org/oc/profile/getalldetails";
     private static String ALL_TASKS_URL = "http://api.pragyan.org/oc/task/all";
     private static String TARGET_USER_TASKS_URL = "http://api.pragyan.org/oc/task/target/all";
+    private static String CREATE_NEW_TASK_URL =  "http://api.pragyan.org/oc/task/create";
+    private static String CREATE_CHAT_URL = "http://api.pragyan.org/oc/task/chat/create";
     public static String LOGGING = "LOGGING";
+
+    public static String getCreateChatUrl() {
+        return CREATE_CHAT_URL;
+    }
+
+    public static void setCreateChatUrl(String createChatUrl) {
+        CREATE_CHAT_URL = createChatUrl;
+    }
+
+    public static String getCreateNewTaskUrl() {
+        return CREATE_NEW_TASK_URL;
+    }
+
+    public static void setCreateNewTaskUrl(String createNewTaskUrl) {
+        CREATE_NEW_TASK_URL = createNewTaskUrl;
+    }
 
     public static String getAllTasksUrl() {
         return ALL_TASKS_URL;
