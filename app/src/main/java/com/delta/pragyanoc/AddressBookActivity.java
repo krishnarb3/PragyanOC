@@ -91,11 +91,9 @@ public class AddressBookActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                if(user_type.equals("1")||user_type.equals("0")) {
                     Intent intent = new Intent(AddressBookActivity.this, TaskActivity.class);
                     intent.putParcelableArrayListExtra("memberName", userArray);
                     startActivity(intent);
-                }
             }
         });
     }

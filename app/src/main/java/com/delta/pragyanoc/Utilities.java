@@ -10,6 +10,7 @@ public class Utilities {
     private static String PROFILE_URL = "http://api.pragyan.org/oc/profile/getdetails";
     private static String ALL_PROFILE_URL = "http://api.pragyan.org/oc/profile/getalldetails";
     private static String ALL_TASKS_URL = "http://api.pragyan.org/oc/task/all";
+    private static String TARGET_USER_TASKS_URL = "http://api.pragyan.org/oc/task/target/all";
     public static String LOGGING = "LOGGING";
 
     public static String getAllTasksUrl() {
@@ -58,5 +59,13 @@ public class Utilities {
 
     public static void setLoginUrl(String loginUrl) {
         LOGIN_URL = loginUrl;
+    }
+
+    public static String getTargetUserTasksUrl() {
+        return TARGET_USER_TASKS_URL;
+    }
+
+    public static void setTargetUserTasksUrl(String targetUserTasksUrl) {
+        TARGET_USER_TASKS_URL = targetUserTasksUrl;
     }
 }

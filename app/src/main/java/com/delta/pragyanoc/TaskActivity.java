@@ -30,6 +30,7 @@ import java.util.Map;
 public class TaskActivity extends AppCompatActivity {
 
     User member;
+    String user_target_roll;
     String user_type;
     String result;
     ArrayList<String> tasksArrayList;
@@ -46,21 +47,21 @@ public class TaskActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         Bundle bundle = getIntent().getExtras();
         member = bundle.getParcelable("memberName");
-
+        user_target_roll = member.user_roll;
         prefs = getSharedPreferences("UserDetails",
                 Context.MODE_PRIVATE);
         profile = prefs.getString("profileDetails","");
         user_type = prefs.getString("user_type","");
         try {
-            result = new AsyncGetAllTasks().execute().get();
+            result = new AsyncgetTargetUserTasks().execute().get();
             if(result!=null&&!result.equals("")) {
                 SharedPreferences.Editor editor = prefs.edit();
-                editor.putString("allTasks",result);
+                editor.putString("targetUserTasks",result);
                 editor.commit();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            result = prefs.getString("allTasks","");
+            result = prefs.getString("targetUserTasks","");
         }
         Log.d(Utilities.LOGGING,result);
 
@@ -131,14 +132,14 @@ public class TaskActivity extends AppCompatActivity {
         }*/
     }
 
-    public class AsyncGetAllTasks extends AsyncTask<Void,Void,String> {
+    public class AsyncgetTargetUserTasks extends AsyncTask<Void,Void,String> {
 
         String result = "";
         URL url;
         @Override
         protected String doInBackground(Void... voids) {
             try {
-                url = new URL(Utilities.getAllTasksUrl());
+                url = new URL(Utilities.getTargetUserTasksUrl());
             }
             catch(MalformedURLException e) {
                 throw new IllegalArgumentException("invalid url: " + Utilities.getGcmUrl());
@@ -149,6 +150,7 @@ public class TaskActivity extends AppCompatActivity {
             Map<String, String> params = new HashMap<>();
             params.put("user_roll",user_roll);
             params.put("user_secret",user_secret);
+            params.put("user_target_roll",user_target_roll);
             Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
             while(iterator.hasNext()) {
                 Map.Entry<String, String> param = iterator.next();

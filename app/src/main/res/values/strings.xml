@@ -18,4 +18,5 @@
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_teams">TeamsActivity</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_task_acc2_team">TaskAcc2TeamActivity</string>
 </resources>

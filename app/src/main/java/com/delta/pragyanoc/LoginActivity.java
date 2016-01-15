@@ -122,6 +122,13 @@ public class LoginActivity extends AppCompatActivity {
                             if(allprofileDetails!=null&&!allprofileDetails.equals(""))
                                 editor.putString("allprofileDetails",allprofileDetails);
                             editor.commit();
+                        try {
+                            String alltasks = new AsyncGetAllTasks().execute().get();
+                            editor.putString("alltasks",alltasks);
+                            editor.commit();
+                        }catch(Exception e) {
+                            Log.d(Utilities.LOGGING,e+"");
+                        }
                 } catch (Exception e) {
                     Log.d(Utilities.LOGGING,e+"");
                 }
@@ -501,4 +508,74 @@ public class LoginActivity extends AppCompatActivity {
             pd.dismiss();
         }
     }
+    public class AsyncGetAllTasks extends AsyncTask<Void,Void,String> {
+
+        String result = "";
+        URL url;
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                url = new URL(Utilities.getAllTasksUrl());
+            }
+            catch(MalformedURLException e) {
+                throw new IllegalArgumentException("invalid url: " + Utilities.getGcmUrl());
+            }
+            String user_roll = prefs.getString("user_roll","");
+            String user_secret = prefs.getString("user_secret","");
+            StringBuilder bodyBuilder = new StringBuilder();
+            Map<String, String> params = new HashMap<>();
+            params.put("user_roll",user_roll);
+            params.put("user_secret",user_secret);
+            Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
+            while(iterator.hasNext()) {
+                Map.Entry<String, String> param = iterator.next();
+                bodyBuilder.append(param.getKey()).append('=')
+                        .append(param.getValue());
+                if (iterator.hasNext()) {
+                    bodyBuilder.append('&');
+                }
+            }
+            String body = bodyBuilder.toString();
+            Log.v(Utilities.LOGGING,"Posting '"+body+"' to "+url);
+            byte[] bytes = body.getBytes();
+            HttpURLConnection conn = null;
+            try {
+                Log.d("URL", "> " + url);
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                conn.setUseCaches(false);
+                conn.setFixedLengthStreamingMode(bytes.length);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type",
+                        "application/x-www-form-urlencoded;charset=UTF-8");
+                OutputStream out = conn.getOutputStream();
+                out.write(bytes);
+                out.close();
+                InputStream in = conn.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                CharSequence charSequence = "status";
+                String line = null;
+                try {
+                    while ((line = reader.readLine()) != null) {
+                        result = result + line;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            catch(Exception e) {
+                Log.e(Utilities.LOGGING, e + "");
+            }
+            Log.d(Utilities.LOGGING,result);
+            return result;
+        }
+    }
+
 }

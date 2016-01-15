@@ -55,7 +55,7 @@ public class TeamsActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(TeamsActivity.this,TaskActivity.class);
+                Intent intent = new Intent(TeamsActivity.this,TaskAcc2TeamActivity.class);
                 intent.putExtra("team_id",teamids.get(i));
                 intent.putExtra("team_name",teamnames.get(i));
                 startActivity(intent);
