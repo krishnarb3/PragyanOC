@@ -13,11 +13,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -63,6 +61,9 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
             Log.d(Utilities.LOGGING,message.toString());
             final ArrayList<Task> tasksArray = new ArrayList<>();
             ArrayList<String> taskDisplay = new ArrayList<>();
+            ArrayList<String> taskNames = new ArrayList<>();
+            ArrayList<String> taskAssignees = new ArrayList<>();
+            ArrayList<String> taskStatus = new ArrayList<>();
             for(int i=0;i<message.length();i++) {
                 JSONObject taskObject = message.getJSONObject(i);
                 Task task = new Task();
@@ -71,36 +72,18 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
                 task.task_completed = taskObject.getString("task_completed");
                 task.task_id = taskObject.getString("task_id");
                 task.task_name = taskObject.getString("task_name");
-                tasksArray.add(task);
-                taskDisplay.add(task.task_name+ " - ");
+                JSONArray task_assignees_json = taskObject.getJSONArray("assigned");
+                taskAssignees.add(task_assignees_json.toString());
+                if(team_id.equals(task.team_id)) {
+                    taskNames.add(task.task_name);
+                    taskStatus.add(task.task_completed);
+                    tasksArray.add(task);
+                    taskDisplay.add(task.task_name + " - ");
+                }
             }
             ListView listView = (ListView)findViewById(R.id.listview);   //TODO MAKE CUSTOM ADAPTER TO HANDLE BACKGROUND COLOR CHANGE
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,taskDisplay){
-                @Override
-                public View getView(int position, View convertView, ViewGroup parent) {
-                    TextView text = (TextView) super.getView(position,convertView,parent);
-                    try {
-                        JSONObject tasksJSON = new JSONObject(allTasks);
-                        JSONArray tasks = tasksJSON.getJSONArray("message");
-                        for(int i=0;i<tasks.length();i++) {
-                            JSONObject task = tasks.getJSONObject(i);
-                            Log.d(Utilities.LOGGING,task.toString());
-                            Log.d(Utilities.LOGGING,task.getString("task_completed"));
-                            if(task.getString("task_completed").equals("1"))
-                                text.setBackgroundColor(getResources().getColor(R.color.colorTaskInProgress));
-                            else if(task.getString("task_completed").equals("0"))
-                                text.setBackgroundColor(getResources().getColor(R.color.colorTaskIncomplete));
-                            else
-                                text.setBackgroundColor(getResources().getColor(R.color.colorTaskCompleted));
-
-                        }
-                    }catch(Exception e) {
-                        Log.e(Utilities.LOGGING,e+"");
-                    }
-                    return text;
-                }
-            };
-            listView.setAdapter(adapter);
+            CustomTaskAdapter customTaskAdapter = new CustomTaskAdapter(this,taskNames,taskAssignees,taskStatus);
+            listView.setAdapter(customTaskAdapter);
             final String user_roll = prefs.getString("user_roll","");
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
