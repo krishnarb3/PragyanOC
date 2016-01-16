@@ -18,4 +18,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Enter task here"/>
+    <EditText
+        android:id="@+id/edit_text_assignees"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter assignees here"/>
 </LinearLayout>

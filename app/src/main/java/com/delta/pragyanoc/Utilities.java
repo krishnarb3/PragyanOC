@@ -13,7 +13,34 @@ public class Utilities {
     private static String TARGET_USER_TASKS_URL = "http://api.pragyan.org/oc/task/target/all";
     private static String CREATE_NEW_TASK_URL =  "http://api.pragyan.org/oc/task/create";
     private static String CREATE_CHAT_URL = "http://api.pragyan.org/oc/task/chat/create";
+    private static String GET_CHAT_URL = "http://api.pragyan.org/oc/task/chat/read";
+    private static String ASSIGN_TO_TASK_URL = "http://api.pragyan.org/oc/task/assign";
+    private static String UPDATE_TASK_STATUS_URL = "http://api.pragyan.org/oc/task/status/update";
     public static String LOGGING = "LOGGING";
+
+    public static String getUpdateTaskStatusUrl() {
+        return UPDATE_TASK_STATUS_URL;
+    }
+
+    public static void setUpdateTaskStatusUrl(String updateTaskStatusUrl) {
+        UPDATE_TASK_STATUS_URL = updateTaskStatusUrl;
+    }
+
+    public static String getAssignToTaskUrl() {
+        return ASSIGN_TO_TASK_URL;
+    }
+
+    public static void setAssignToTaskUrl(String assignToTaskUrl) {
+        ASSIGN_TO_TASK_URL = assignToTaskUrl;
+    }
+
+    public static String getGetChatUrl() {
+        return GET_CHAT_URL;
+    }
+
+    public static void setGetChatUrl(String getChatUrl) {
+        GET_CHAT_URL = getChatUrl;
+    }
 
     public static String getCreateChatUrl() {
         return CREATE_CHAT_URL;

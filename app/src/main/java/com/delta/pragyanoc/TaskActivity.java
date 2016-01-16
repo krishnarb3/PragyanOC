@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -77,30 +78,34 @@ public class TaskActivity extends AppCompatActivity {
             Log.e(Utilities.LOGGING,e+"");
         }
         if(tasksArrayList!=null) {
-            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, tasksArrayList);
+            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, tasksArrayList){
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    try {
+                        View view = super.getView(position, convertView, parent);
+                        JSONObject tasksJSON = new JSONObject(result);
+                        JSONArray tasks = tasksJSON.getJSONArray("message");
+                        for(int i=0;i<tasks.length();i++) {
+                            JSONObject task = tasks.getJSONObject(i);
+                            Log.d(Utilities.LOGGING,"task_completed"+task.getString("task_completed"));
+                            switch(Integer.parseInt(task.getString("task_completed"))) {
+                                case 0 : view.setBackgroundColor(getResources().getColor(R.color.colorTaskIncomplete));
+                                    break;
+                                case 1 : view.setBackgroundColor(getResources().getColor(R.color.colorTaskInProgress));
+                                    break;
+                                case 2 :view.setBackgroundColor(getResources().getColor(R.color.colorTaskCompleted));
+                                    break;
+                            }
+                        }
+                    }catch(Exception e) {
+                        Log.e(Utilities.LOGGING,e+"");
+                    }
+                    return super.getView(position, convertView, parent);
+                }
+            };
             listViewTasks.setAdapter(adapter);
         }
-        try {
-            JSONObject tasksJSON = new JSONObject(result);
-            JSONArray tasks = tasksJSON.getJSONArray("message");
-            for(int i=0;i<tasks.length();i++) {
-                JSONObject task = tasks.getJSONObject(i);
-                View view;
-                switch(Integer.parseInt(task.getString("task_completed"))) {
-                    case 0 : view = listViewTasks.getAdapter().getView(i,null,null);
-                             view.setBackgroundColor(getResources().getColor(R.color.colorTaskIncomplete));
-                             break;
-                    case 1 : view = listViewTasks.getAdapter().getView(i,null,null);
-                             view.setBackgroundColor(getResources().getColor(R.color.colorTaskInProgress));
-                             break;
-                    case 2 : view = listViewTasks.getAdapter().getView(i,null,null);
-                             view.setBackgroundColor(getResources().getColor(R.color.colorTaskCompleted));
-                             break;
-                }
-            }
-        }catch(Exception e) {
-            Log.e(Utilities.LOGGING,e+"");
-        }
+
         /*if(user_type.equals("1")|| user_type.equals("0")) {
             FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
