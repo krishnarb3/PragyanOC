@@ -44,6 +44,8 @@ public class ChatActivity extends AppCompatActivity {
         prefs = getSharedPreferences("UserDetails",
                 Context.MODE_PRIVATE);
         arrayList = new ArrayList<>();
+        Bundle bundle = getIntent().getExtras();
+        final String task_id = bundle.getString("task_id");
         final String user_roll = prefs.getString("user_roll","");
         final String user_secret = prefs.getString("user_secret","");
         final EditText editText = (EditText) findViewById(R.id.newchat);
@@ -53,7 +55,8 @@ public class ChatActivity extends AppCompatActivity {
             JSONArray messageArrayJSON = messagesJSON.getJSONArray("message");
             for(int i=0;i<messageArrayJSON.length();i++) {
                 JSONObject messageJSON = (JSONObject) messageArrayJSON.get(i);
-                arrayList.add(messageJSON.getString("user_name")+"\n\n"+messageJSON.getString("msg_data"));
+                if(task_id.equals(messagesJSON.getString("task_id")))
+                    arrayList.add(messageJSON.getString("user_name")+"\n\n"+messageJSON.getString("msg_data"));
             }
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,arrayList);
             ListView listView = (ListView) findViewById(R.id.chatlist);
@@ -68,7 +71,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String msg = editText.getText().toString();
                 try {
-                    String res = new AsyncSendMessage().execute(user_roll, user_secret, "1", msg).get(); //TODO TO CHANGE taskID
+                    String res = new AsyncSendMessage().execute(user_roll, user_secret,task_id, msg).get();
                 } catch (Exception e) {
                     Snackbar.make(view, "Error occurred , Try later", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();

@@ -51,6 +51,16 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        try {
+            Bundle bundle = getIntent().getExtras();
+            String close = bundle.getString("close","");
+            if(close.equals("close")) {
+                Log.d(Utilities.LOGGING,"Close");
+                finish();
+            }
+        }catch(Exception e) {
+            Log.d(Utilities.LOGGING,e+"");
+        }
         username = (EditText)findViewById(R.id.email);
         password = (EditText)findViewById(R.id.password);
         button = (Button)findViewById(R.id.submit);

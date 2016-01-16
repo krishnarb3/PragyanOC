@@ -93,7 +93,7 @@ public class AddressBookActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                     Intent intent = new Intent(AddressBookActivity.this, TaskActivity.class);
-                    intent.putParcelableArrayListExtra("memberName", userArray);
+                    intent.putExtra("user_target_roll", userArray.get(position).user_roll);
                     startActivity(intent);
             }
         });

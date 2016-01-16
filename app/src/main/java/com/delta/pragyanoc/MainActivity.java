@@ -46,4 +46,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this,LoginActivity.class);
+        intent.putExtra("close","close");
+        startActivity(intent);
+        finish();
+    }
 }

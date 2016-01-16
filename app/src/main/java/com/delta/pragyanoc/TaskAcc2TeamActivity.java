@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -40,7 +39,7 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
     String team_name;
     SharedPreferences prefs;
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_acc2_team);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -97,6 +96,7 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
                     arrayAdapter.add("Not started");
                     arrayAdapter.add("In progress");
                     arrayAdapter.add("Completed");
+                    arrayAdapter.add("See Messages");
                     builderSingle.setNegativeButton(
                             "cancel",
                             new DialogInterface.OnClickListener() {
@@ -126,6 +126,9 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
                                             case 0: task_status = "0";break;
                                             case 1: task_status = "1";break;
                                             case 2: task_status = "2";break;
+                                            case 3: Intent intent = new Intent(TaskAcc2TeamActivity.this,ChatActivity.class);
+                                                    intent.putExtra("task_id",tasksArray.get(i).task_id);
+                                                    startActivity(intent);
                                             default: task_status = "1";break;
                                         }
                                         if(isPresent||user_type.equals("0")||user_type.equals("1")) {
@@ -143,18 +146,20 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
                                     AlertDialog.Builder builderInner = new AlertDialog.Builder(
                                             TaskAcc2TeamActivity.this);
                                     builderInner.setMessage(strName);
-                                    builderInner.setTitle("Your Selected Item is");
-                                    builderInner.setPositiveButton(
-                                            "Ok",
-                                            new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(
-                                                        DialogInterface dialog,
-                                                        int which) {
-                                                    dialog.dismiss();
-                                                }
-                                            });
-                                    builderInner.show();
+                                    if(which!=3) {
+                                        builderInner.setTitle("Your Selected Item is");
+                                        builderInner.setPositiveButton(
+                                                "Ok",
+                                                new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(
+                                                            DialogInterface dialog,
+                                                            int which) {
+                                                        dialog.dismiss();
+                                                    }
+                                                });
+                                        builderInner.show();
+                                    }
                                 }
                             });
                     builderSingle.show();
@@ -165,16 +170,6 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
             Log.d(Utilities.LOGGING,e+"");
             Toast.makeText(this,"Error occurred",Toast.LENGTH_SHORT).show();
         }
-        FloatingActionButton fabNewMessage = (FloatingActionButton) findViewById(R.id.fab_new_message);
-        fabNewMessage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(TaskAcc2TeamActivity.this,ChatActivity.class);
-                startActivity(intent);
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
         FloatingActionButton fabNewTask = (FloatingActionButton) findViewById(R.id.fab_new_task);
         fabNewTask.setOnClickListener(new View.OnClickListener() {
             @Override
