@@ -4,15 +4,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.EditText;
+import android.widget.Toast;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -23,141 +22,69 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class TaskActivity extends AppCompatActivity {
+public class NewTaskActivity extends AppCompatActivity {
 
-    ArrayList<User> member;
-    String user_target_roll;
-    String user_type;
-    String result;
-    ArrayList<String> tasksArrayList;
-    ArrayAdapter<String> adapter;
-    ListView listViewTasks;
     SharedPreferences prefs;
-    private String newTask;
-    String profile;
+    String team_id;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_task);
+        setContentView(R.layout.activity_new_task);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Bundle bundle = getIntent().getExtras();
-        member = bundle.getParcelableArrayList("memberName");
-        user_target_roll = member.get(0).user_roll;
+        team_id = bundle.getString("team_id");
         prefs = getSharedPreferences("UserDetails",
                 Context.MODE_PRIVATE);
-        profile = prefs.getString("profileDetails","");
-        user_type = prefs.getString("user_type","");
-        try {
-            result = new AsyncgetTargetUserTasks().execute().get();
-            if(result!=null&&!result.equals("")) {
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putString("targetUserTasks",result);
-                editor.commit();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            result = prefs.getString("targetUserTasks","");
-        }
-        Log.d(Utilities.LOGGING,result);
-
-        listViewTasks = (ListView)findViewById(R.id.listView_tasks);
-        try {
-            JSONObject tasksJSON = new JSONObject(result);
-            JSONArray tasks = tasksJSON.getJSONArray("message");
-            for(int i=0;i<tasks.length();i++) {
-                JSONObject task = tasks.getJSONObject(i);
-                tasksArrayList.add(task.getString("task_name"));
-            }
-        } catch(Exception e) {
-            Log.e(Utilities.LOGGING,e+"");
-        }
-        if(tasksArrayList!=null) {
-            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, tasksArrayList){
-                @Override
-                public View getView(int position, View convertView, ViewGroup parent) {
-                    try {
-                        View view = super.getView(position, convertView, parent);
-                        JSONObject tasksJSON = new JSONObject(result);
-                        JSONArray tasks = tasksJSON.getJSONArray("message");
-                        for(int i=0;i<tasks.length();i++) {
-                            JSONObject task = tasks.getJSONObject(i);
-                            Log.d(Utilities.LOGGING,"task_completed"+task.getString("task_completed"));
-                            switch(Integer.parseInt(task.getString("task_completed"))) {
-                                case 0 : view.setBackgroundColor(getResources().getColor(R.color.colorTaskIncomplete));
-                                    break;
-                                case 1 : view.setBackgroundColor(getResources().getColor(R.color.colorTaskInProgress));
-                                    break;
-                                case 2 :view.setBackgroundColor(getResources().getColor(R.color.colorTaskCompleted));
-                                    break;
-                            }
-                        }
-                    }catch(Exception e) {
-                        Log.e(Utilities.LOGGING,e+"");
-                    }
-                    return super.getView(position, convertView, parent);
+        final String user_roll = prefs.getString("user_roll","");
+        final String user_secret = prefs.getString("user_secret","");
+        final EditText editText = (EditText) findViewById(R.id.edit_text);
+        final EditText editTextAssignees = (EditText) findViewById(R.id.edit_text_assignees);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String task = editText.getText().toString();
+                String rollnos = editTextAssignees.getText().toString();
+                try {
+                    String result = new AsyncCreateNewTask().execute(user_roll, user_secret, team_id, task).get();
+                    JSONObject resultJSON = new JSONObject(result.substring(4,result.length()));
+                    String task_id = ((JSONObject)resultJSON.get("message")).getString("task_id");
+                    String result2 = new AsyncAssigntoTask().execute(user_roll,user_secret,task_id,rollnos).get();
+                    if(result!=null&&!result.equals("")&&result2!=null&&!result2.equals(""))
+                        finish();
+                }catch(Exception e) {
+                    Log.e(Utilities.LOGGING,e+"");
+                    Toast.makeText(NewTaskActivity.this,"Failed to create , try later",Toast.LENGTH_SHORT).show();
                 }
-            };
-            listViewTasks.setAdapter(adapter);
-        }
-
-        /*if(user_type.equals("1")|| user_type.equals("0")) {
-            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    AlertDialog.Builder builder = new AlertDialog.Builder(TaskActivity.this);
-                    builder.setTitle("Add Task to this Member");
-                    final EditText input = new EditText(getApplicationContext());
-                    input.setInputType(InputType.TYPE_CLASS_TEXT);
-                    builder.setView(input);
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            newTask = input.getText().toString();
-
-                            //String response = new Async
-                            //TODO Api call
-                        }
-                    });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-                    builder.show();
-                }
-            });
-        }*/
+            }
+        });
     }
-
-    public class AsyncgetTargetUserTasks extends AsyncTask<Void,Void,String> {
-
-        String result = "";
+    public class AsyncCreateNewTask extends AsyncTask<String,Void,String> {
         URL url;
+        String result;
         @Override
-        protected String doInBackground(Void... voids) {
+        protected String doInBackground(String... strings) {
+            String user_roll = strings[0];
+            String user_secret = strings[1];
+            String team_id = strings[2];
+            String task = strings[3];
             try {
-                url = new URL(Utilities.getTargetUserTasksUrl());
+                url = new URL(Utilities.getCreateNewTaskUrl());
             }
             catch(MalformedURLException e) {
                 throw new IllegalArgumentException("invalid url: " + Utilities.getGcmUrl());
             }
-            String user_roll = prefs.getString("user_roll","");
-            String user_secret = prefs.getString("user_secret","");
             StringBuilder bodyBuilder = new StringBuilder();
             Map<String, String> params = new HashMap<>();
             params.put("user_roll",user_roll);
             params.put("user_secret",user_secret);
-            params.put("user_target_roll",user_target_roll);
+            params.put("team_id",team_id);
+            params.put("task_name",task);
             Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
             while(iterator.hasNext()) {
                 Map.Entry<String, String> param = iterator.next();
@@ -209,23 +136,31 @@ public class TaskActivity extends AppCompatActivity {
             return result;
         }
     }
-
-    public class AsyncChangeStatus extends AsyncTask<Void,Void,String> {
+    public class AsyncAssigntoTask extends AsyncTask<String,Void,String> {
+        String user_roll;
+        String user_secret;
+        String task_id;
+        String task_assignees;
+        String result;
         URL url;
         @Override
-        protected String doInBackground(Void... voids) {
+        protected String doInBackground(String... strings) {
+            user_roll = strings[0];
+            user_secret = strings[1];
+            task_id = strings[2];
+            task_assignees = strings[3];
             try {
-                url = new URL(Utilities.getLoginUrl());
+                url = new URL(Utilities.getAssignToTaskUrl());
             }
             catch(MalformedURLException e) {
                 throw new IllegalArgumentException("invalid url: " + Utilities.getGcmUrl());
             }
-            String user_roll = prefs.getString("user_roll","");
-            String user_secret = prefs.getString("user_secret","");
             StringBuilder bodyBuilder = new StringBuilder();
             Map<String, String> params = new HashMap<>();
             params.put("user_roll",user_roll);
             params.put("user_secret",user_secret);
+            params.put("task_id",task_id);
+            params.put("assigned_list",task_assignees);
             Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
             while(iterator.hasNext()) {
                 Map.Entry<String, String> param = iterator.next();
@@ -277,5 +212,4 @@ public class TaskActivity extends AppCompatActivity {
             return result;
         }
     }
-
 }

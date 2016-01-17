@@ -34,13 +34,17 @@ public class TeamsActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ListView listView = (ListView) findViewById(R.id.teams);
+
+        teamnames = new ArrayList<>();
+        team_show = new ArrayList<>();
+        teamids = new ArrayList<>();
         prefs = getSharedPreferences("UserDetails",
                 Context.MODE_PRIVATE);
         try {
             profileDetails = prefs.getString("profileDetails", "");
             Log.d(Utilities.LOGGING,profileDetails);
             JSONObject profileJSON = new JSONObject(profileDetails);
-            JSONArray teams = profileJSON.getJSONArray("user_teams");
+            JSONArray teams = ((JSONObject)profileJSON.get("message")).getJSONArray("user_teams");
             for(int i=0;i<teams.length();i++) {
                 JSONObject team = (JSONObject) teams.get(i);
                 teamnames.add(team.getString("team_name"));
@@ -50,12 +54,15 @@ public class TeamsActivity extends AppCompatActivity {
         }catch(Exception e) {
             Log.e(Utilities.LOGGING,e+"");
         }
-        ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1,team_show);
-        listView.setAdapter(adapter);
+        ArrayAdapter<String> adapter;
+        if(team_show!=null) {
+            adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, team_show);
+            listView.setAdapter(adapter);
+        }
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(TeamsActivity.this,TaskActivity.class);
+                Intent intent = new Intent(TeamsActivity.this,TaskAcc2TeamActivity.class);
                 intent.putExtra("team_id",teamids.get(i));
                 intent.putExtra("team_name",teamnames.get(i));
                 startActivity(intent);
