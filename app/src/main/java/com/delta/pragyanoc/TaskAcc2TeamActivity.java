@@ -1,5 +1,6 @@
 package com.delta.pragyanoc;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -84,6 +85,45 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
             CustomTaskAdapter customTaskAdapter = new CustomTaskAdapter(this,taskNames,taskAssignees,taskStatus);
             listView.setAdapter(customTaskAdapter);
             final String user_roll = prefs.getString("user_roll","");
+            listView.setOnItemLongClickListener(
+                    new AdapterView.OnItemLongClickListener() {
+                        @Override
+                        public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                            final AlertDialog.Builder dialog = new AlertDialog.Builder(TaskAcc2TeamActivity.this);
+                            dialog.setTitle("Update/Delete");
+                            dialog.setMessage("Do you want to Delete or Update");
+                            dialog.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Task task = tasksArray.get(position);
+                                    String task_name = task.task_name;
+                                    String task_id = task.task_id;
+                                    String team_id = task.team_id;
+                                    Intent intent = new Intent(TaskAcc2TeamActivity.this, NewTaskActivity.class);
+                                    intent.putExtra("task_name", task_name);
+                                    intent.putExtra("task_id", task_id);
+                                    intent.putExtra("team_id", team_id);
+                                    intent.putExtra("intentType","1");
+                                    startActivity(intent);
+                                }
+                            });
+                            dialog.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Task task = tasksArray.get(position);
+                                    String task_id = task.task_id;
+                                    Intent intent = new Intent(TaskAcc2TeamActivity.this, NewTaskActivity.class);
+                                    intent.putExtra("task_id", task_id);
+                                    intent.putExtra("intentType","2");
+                                    startActivity(intent);
+
+                                }
+                            });
+                            dialog.show();
+                            return true;
+                        }
+                    }
+            );
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view,final int i, long l) {
