@@ -53,7 +53,7 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
             allTasks = new AsyncGetAllTasks().execute().get();
             SharedPreferences.Editor editor = prefs.edit();
             editor.putString("allTasks",allTasks);
-            editor.commit();
+            editor.apply();
             allTasks = prefs.getString("allTasks","");
             JSONObject alltasksObject = new JSONObject(allTasks);
             final JSONArray message = alltasksObject.getJSONArray("message");
@@ -133,7 +133,7 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
                                         }
                                         if(isPresent||user_type.equals("0")||user_type.equals("1")) {
                                             Log.d(Utilities.LOGGING,"Updating"+tasksArray.get(i).task_id+"withstatus"+task_status);
-                                            String res = new AsyncUpdateTaskStatus().execute(tasksArray.get(i).task_id,task_status).get();
+                                            String res = new AsyncUpdateTaskStatus().execute(tasksArray.get(i).task_id,task_status,team_id,prefs.getString("user_roll",""),prefs.getString("user_secret","")).get();
                                         }
                                         else {
                                             Toast.makeText(TaskAcc2TeamActivity.this, "You dont have Permissions", Toast.LENGTH_LONG).show();
@@ -181,13 +181,6 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
         });
     }
 
-    public class Task {
-        public String task_id;
-        public String task_name;
-        public String task_completed;
-        public String team_id;
-        public String team_name;
-    }
 
     public class AsyncgetTargetUserTasks extends AsyncTask<String,Void,String> {
 
@@ -279,80 +272,6 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
             Map<String, String> params = new HashMap<>();
             params.put("user_roll",user_roll);
             params.put("user_secret",user_secret);
-            Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
-            while(iterator.hasNext()) {
-                Map.Entry<String, String> param = iterator.next();
-                bodyBuilder.append(param.getKey()).append('=')
-                        .append(param.getValue());
-                if (iterator.hasNext()) {
-                    bodyBuilder.append('&');
-                }
-            }
-            String body = bodyBuilder.toString();
-            Log.v(Utilities.LOGGING,"Posting '"+body+"' to "+url);
-            byte[] bytes = body.getBytes();
-            HttpURLConnection conn = null;
-            try {
-                Log.d("URL", "> " + url);
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setDoOutput(true);
-                conn.setUseCaches(false);
-                conn.setFixedLengthStreamingMode(bytes.length);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type",
-                        "application/x-www-form-urlencoded;charset=UTF-8");
-                OutputStream out = conn.getOutputStream();
-                out.write(bytes);
-                out.close();
-                InputStream in = conn.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                CharSequence charSequence = "status";
-                String line = null;
-                try {
-                    while ((line = reader.readLine()) != null) {
-                        result = result + line;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        in.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            catch(Exception e) {
-                Log.e(Utilities.LOGGING, e + "");
-            }
-            Log.d(Utilities.LOGGING,result);
-            return result;
-        }
-    }
-
-    public class AsyncUpdateTaskStatus extends AsyncTask<String,Void,String> {
-        @Override
-        protected String doInBackground(String... strings) {
-            String user_roll = prefs.getString("user_roll","");
-            String user_secret = prefs.getString("user_secret","");
-            String task_id = strings[0];
-            String task_completed = strings[1];
-            URL url;
-            String result="";
-            try {
-                url = new URL(Utilities.getUpdateTaskStatusUrl());
-            }
-            catch(MalformedURLException e) {
-                throw new IllegalArgumentException("invalid url: " + Utilities.getGcmUrl());
-            }
-            StringBuilder bodyBuilder = new StringBuilder();
-            Map<String, String> params = new HashMap<>();
-            params.put("user_roll",user_roll);
-            params.put("user_secret",user_secret);
-            params.put("team_id",team_id);
-            params.put("task_id",task_id);
-            params.put("task_status",task_completed);
             Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
             while(iterator.hasNext()) {
                 Map.Entry<String, String> param = iterator.next();
