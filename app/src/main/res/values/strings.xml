@@ -13,12 +13,12 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-    <string name="title_activity_address_book">AddressBookActivity</string>
-    <string name="title_activity_task">TaskActivity</string>
-    <string name="title_activity_login">LoginActivity</string>
-    <string name="title_activity_teams">TeamsActivity</string>
-    <string name="title_activity_main">MainActivity</string>
-    <string name="title_activity_task_acc2_team">TaskAcc2TeamActivity</string>
-    <string name="title_activity_chat">ChatActivity</string>
-    <string name="title_activity_new_task">NewTaskActivity</string>
+    <string name="title_activity_address_book">Contacts</string>
+    <string name="title_activity_task">Tasks</string>
+    <string name="title_activity_login">Pragyan OC App</string>
+    <string name="title_activity_teams">Teams</string>
+    <string name="title_activity_main">Home</string>
+    <string name="title_activity_task_acc2_team">Team tasks</string>
+    <string name="title_activity_chat">Chat</string>
+    <string name="title_activity_new_task">New Task</string>
 </resources>

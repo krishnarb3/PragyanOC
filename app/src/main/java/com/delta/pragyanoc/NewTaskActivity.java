@@ -122,6 +122,7 @@ public class NewTaskActivity extends AppCompatActivity {
                     user.user_roll = jsonObject.getString("user_roll");
                     user.user_phone = jsonObject.getString("user_phone");
                     user.user_type = jsonObject.getString("user_type");
+                    user.user_teams = jsonObject.getJSONArray("teams").toString();
                     userArray.add(user);
                     String year;
                     if (user.user_type.equals("0"))
@@ -130,7 +131,13 @@ public class NewTaskActivity extends AppCompatActivity {
                         year = "3rd year";
                     else
                         year = "2nd year";
-                    arrayList.add(user.user_name + " | " + user.user_phone + " | " + year);
+                   JSONArray team_ids = new JSONArray(user.user_teams);
+                    boolean iscontains = false;
+                    for(int t=0;t<team_ids.length();t++)
+                        if(team_ids.get(t).equals(team_id))
+                            iscontains = true;
+                    if(iscontains)
+                        arrayList.add(user.user_name + " | " + user.user_phone + " | " + year);
                 }
                 editTextAssignees.setVisibility(View.GONE);
                 final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);

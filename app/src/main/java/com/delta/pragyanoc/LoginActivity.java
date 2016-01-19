@@ -79,6 +79,7 @@ public class LoginActivity extends AppCompatActivity {
         if((!prefs.getString("user_roll","").equals(""))&&(!prefs.getString("user_gcmid","").equals("")&&!prefs.getString("user_secret","").equals(""))) {
             Intent intent = new Intent(LoginActivity.this,MainActivity.class);
             startActivity(intent);
+            finish();
         }
     }
 
@@ -310,6 +311,7 @@ public class LoginActivity extends AppCompatActivity {
                     if((!prefs.getString("user_roll","").equals(""))&&(!prefs.getString("user_gcmid","").equals("")&&!prefs.getString("user_secret","").equals(""))) {
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
+                        finish();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

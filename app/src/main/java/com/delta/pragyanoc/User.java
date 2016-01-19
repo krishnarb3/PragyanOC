@@ -11,6 +11,7 @@ public class User implements Parcelable {
     public String user_roll;
     public String user_phone;
     public String user_type;
+    public String user_teams;
 
     public User() {
 
@@ -20,6 +21,7 @@ public class User implements Parcelable {
         user_roll = in.readString();
         user_phone = in.readString();
         user_type = in.readString();
+        user_teams = in.readString();
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
@@ -45,5 +47,6 @@ public class User implements Parcelable {
         dest.writeString(user_roll);
         dest.writeString(user_phone);
         dest.writeString(user_type);
+        dest.writeString(user_teams);
     }
 }
