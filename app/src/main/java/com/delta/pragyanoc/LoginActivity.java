@@ -101,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putString("user_secret", user_secret);
-                        editor.commit();
+                        editor.apply();
                     }
                     SharedPreferences.Editor editor = prefs.edit();
                     new AsyncRegisterWithGCM().execute(userRoll);
@@ -110,7 +110,7 @@ public class LoginActivity extends AppCompatActivity {
                                 //profileDetails = profileDetails.substring(4, profileDetails.length());
                                 Log.d(Utilities.LOGGING + "profileDetails", profileDetails);
                                 editor.putString("profileDetails",profileDetails);
-                                editor.commit();
+                                editor.apply();
                                 JSONObject profileJSON = new JSONObject(profileDetails);
                                 String user_type =profileJSON.getString("user_type");
                                 editor.putString("user_type",user_type);

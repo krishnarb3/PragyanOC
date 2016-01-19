@@ -9,9 +9,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,6 +26,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -32,10 +36,12 @@ public class NewTaskActivity extends AppCompatActivity {
 
     SharedPreferences prefs;
     String team_id,type,task_id,task_name;
+    ArrayList<User> userArray;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_task);
+        userArray = new ArrayList<>();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         final EditText editText = (EditText) findViewById(R.id.edit_text);
@@ -97,13 +103,39 @@ public class NewTaskActivity extends AppCompatActivity {
 
         }
         else {
-            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+            final ArrayList<String> arrayList = new ArrayList<>();
+            final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     String task = editText.getText().toString();
                     String rollnos = editTextAssignees.getText().toString();
+                    ListView assigneesList = (ListView) findViewById(R.id.assignees_list);
+                    String allprofileDetails = prefs.getString("allprofileDetails","");
                     try {
+                        JSONObject allprofileJSON = new JSONObject(allprofileDetails);
+                        JSONArray profileArrays = allprofileJSON.getJSONArray("message");
+                        for(int i=0;i<profileArrays.length();i++) {
+                            JSONObject jsonObject = (JSONObject)profileArrays.get(i);
+                            User user = new User();
+                            user.user_name = jsonObject.getString("user_name");
+                            user.user_roll = jsonObject.getString("user_roll");
+                            user.user_phone = jsonObject.getString("user_phone");
+                            user.user_type = jsonObject.getString("user_type");
+                            userArray.add(user);
+                            String year;
+                            if(user.user_type.equals("0"))
+                                year = "4th Year";
+                            else if(user.user_type.equals("1"))
+                                year = "3rd year";
+                            else
+                                year = "2nd year";
+                            arrayList.add(user.user_name+" | "+user.user_phone+" | "+year);
+                        }
+                        ArrayAdapter adapter = new ArrayAdapter(NewTaskActivity.this, android.R.layout.simple_list_item_1, arrayList);
+                        assigneesList.setAdapter(adapter);
+
+//                        /---------------------------->
                         String result = new AsyncCreateNewTask().execute(user_roll, user_secret, team_id, task,"").get();
                         JSONObject resultJSON = new JSONObject(result.substring(4,result.length()));
                         String task_id = ((JSONObject)resultJSON.get("message")).getString("task_id");
