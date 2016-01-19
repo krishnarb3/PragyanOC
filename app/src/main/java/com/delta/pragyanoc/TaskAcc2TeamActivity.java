@@ -1,6 +1,5 @@
 package com.delta.pragyanoc;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -216,6 +215,7 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(TaskAcc2TeamActivity.this,NewTaskActivity.class);
                 intent.putExtra("team_id",team_id);
+                intent.putExtra("intent_type","30");
                 startActivity(intent);
             }
         });

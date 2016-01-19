@@ -46,25 +46,12 @@ public class ChatActivity extends AppCompatActivity {
         arrayList = new ArrayList<>();
         Bundle bundle = getIntent().getExtras();
         final String task_id = bundle.getString("task_id");
+        Log.d(Utilities.LOGGING,task_id);
         final String user_roll = prefs.getString("user_roll","");
         final String user_secret = prefs.getString("user_secret","");
         final EditText editText = (EditText) findViewById(R.id.newchat);
-        try {
-            String messagesJSONString = new AsyncGetMessages().execute(user_roll, user_secret, "1").get();    //TODO TO Change taskID
-            JSONObject messagesJSON = new JSONObject(messagesJSONString);
-            JSONArray messageArrayJSON = messagesJSON.getJSONArray("message");
-            for(int i=0;i<messageArrayJSON.length();i++) {
-                JSONObject messageJSON = (JSONObject) messageArrayJSON.get(i);
-                if(task_id.equals(messagesJSON.getString("task_id")))
-                    arrayList.add(messageJSON.getString("user_name")+"\n\n"+messageJSON.getString("msg_data"));
-            }
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,arrayList);
-            ListView listView = (ListView) findViewById(R.id.chatlist);
-            listView.setAdapter(adapter);
-        }catch (Exception e) {
-            Log.d(Utilities.LOGGING,e+"");
-            Toast.makeText(this,"Couldnt fetch messages,TRy later",Toast.LENGTH_SHORT).show();
-        }
+        getMessagesFromLocal(user_roll,user_secret,task_id);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,6 +65,25 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+    public void getMessagesFromLocal(String user_roll,String user_secret,String task_id) {
+        try {
+            String messagesJSONString = new AsyncGetMessages().execute(user_roll, user_secret, task_id).get();
+            JSONObject messagesJSON = new JSONObject(messagesJSONString);
+            JSONArray messageArrayJSON = messagesJSON.getJSONArray("message");
+            for(int i=0;i<messageArrayJSON.length();i++) {
+                JSONObject messageJSON = (JSONObject) messageArrayJSON.get(i);
+                Log.d(Utilities.LOGGING,"messageJSON : "+messageJSON);
+                if(task_id.equals(messageJSON.getString("task_id")))
+                    arrayList.add(messageJSON.getString("user_name")+"\n\n"+messageJSON.getString("msg_data"));
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,arrayList);
+            ListView listView = (ListView) findViewById(R.id.chatlist);
+            listView.setAdapter(adapter);
+        }catch (Exception e) {
+            Log.d(Utilities.LOGGING,e+"");
+            Toast.makeText(this,"Couldnt fetch messages,TRy later",Toast.LENGTH_SHORT).show();
+        }
     }
     public class AsyncSendMessage extends AsyncTask<String,Void,String> {
         @Override

@@ -55,7 +55,6 @@ public class LoginActivity extends AppCompatActivity {
             Bundle bundle = getIntent().getExtras();
             String close = bundle.getString("close","");
             if(close.equals("close")) {
-                Log.d(Utilities.LOGGING,"Close");
                 finish();
             }
         }catch(Exception e) {
@@ -86,63 +85,18 @@ public class LoginActivity extends AppCompatActivity {
     String profileDetails,allprofileDetails;
     // When Register Me button is clicked
     public void RegisterUser(String userRoll,String userPassword) {
-        String login;
         if (!TextUtils.isEmpty(userRoll)) {
             if (checkPlayServices()) {
                 try {
-                    login = new AsyncLoginTask().execute(userRoll,userPassword).get();
-                    login = login.substring(4,login.length());
-                    JSONObject loginJSON = new JSONObject(login);
-                    int status = (int)loginJSON.get("status_code");
-                    user_secret = loginJSON.get("message").toString();
-                    Log.d(Utilities.LOGGING,user_secret);
-                    if(status==200) {
-                        SharedPreferences prefs = getSharedPreferences("UserDetails",
-                                Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.putString("user_secret", user_secret);
-                        editor.apply();
-                    }
-                    SharedPreferences.Editor editor = prefs.edit();
+                    new AsyncLoginTask().execute(userRoll,userPassword);
                     new AsyncRegisterWithGCM().execute(userRoll);
-                            try {
-                                profileDetails = new AsyncgetProfile().execute().get();
-                                //profileDetails = profileDetails.substring(4, profileDetails.length());
-                                Log.d(Utilities.LOGGING + "profileDetails", profileDetails);
-                                editor.putString("profileDetails",profileDetails);
-                                editor.apply();
-                                JSONObject profileJSON = new JSONObject(profileDetails);
-                                String user_type =profileJSON.getString("user_type");
-                                editor.putString("user_type",user_type);
-                                editor.commit();
-                            }catch(Exception e) {
-                                profileDetails = prefs.getString("profileDetails","");
-                            }
-                            if(profileDetails!=null&&!profileDetails.equals(""))
-                                editor.putString("profileDetails",profileDetails);
-                            editor.commit();
-
-                            try {
-                                allprofileDetails = new AsyncgetallProfile().execute().get();
-
-                                Log.d(Utilities.LOGGING, allprofileDetails);
-                            } catch(Exception e) {
-                                allprofileDetails = prefs.getString("allprofileDetails","");
-                            }
-                            if(allprofileDetails!=null&&!allprofileDetails.equals(""))
-                                editor.putString("allprofileDetails",allprofileDetails);
-                            editor.commit();
-                        try {
-                            String alltasks = new AsyncGetAllTasks().execute().get();
-                            editor.putString("alltasks",alltasks);
-                            editor.commit();
-                        }catch(Exception e) {
-                            Log.d(Utilities.LOGGING,e+"");
-                        }
+                    new AsyncgetProfile().execute();
+                    new AsyncgetallProfile().execute();
+                    new AsyncGetAllTasks().execute();
                 } catch (Exception e) {
                     Log.d(Utilities.LOGGING,e+"");
+                    Toast.makeText(LoginActivity.this,"Connection Error",Toast.LENGTH_SHORT).show();
                 }
-
             }
         }
         else {
@@ -205,7 +159,7 @@ public class LoginActivity extends AppCompatActivity {
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putString("user_roll",user_roll);
                     editor.putString("user_password",user_password);
-                    editor.commit();
+                    editor.apply();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
@@ -222,6 +176,30 @@ public class LoginActivity extends AppCompatActivity {
             }
             Log.d(Utilities.LOGGING,result);
             return result;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            String login;
+            login = s;
+            login = login.substring(4,login.length());
+            try {
+                JSONObject loginJSON = new JSONObject(login);
+                int status = (int) loginJSON.get("status_code");
+                user_secret = loginJSON.get("message").toString();
+                Log.d(Utilities.LOGGING, user_secret);
+                if (status == 200) {
+                    SharedPreferences prefs = getSharedPreferences("UserDetails",
+                            Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString("user_secret", user_secret);
+                    editor.apply();
+                }
+            }catch(Exception e) {
+                Log.d(Utilities.LOGGING,e+"");
+                Toast.makeText(LoginActivity.this,"Error Occurred",Toast.LENGTH_SHORT).show();
+            }
         }
     }
     public class AsyncRegisterWithGCM extends AsyncTask<String,Void,String> {
@@ -271,7 +249,7 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(Utilities.LOGGING,"SharedPref\n"+user_roll+","+user_gcmid);
         editor.putString("user_roll", user_roll);
         editor.putString("user_gcmid", user_gcmid);
-        editor.commit();
+        editor.apply();
         storeRegIdinServer(user_roll, user_gcmid, user_secret);
     }
     private void storeRegIdinServer(String user_roll,String user_gcmid,String user_secret) {
@@ -442,6 +420,29 @@ public class LoginActivity extends AppCompatActivity {
             }
             return result;
         }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            SharedPreferences prefs = getSharedPreferences("UserDetails",
+                    Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            try {
+                profileDetails = s;
+                //profileDetails = profileDetails.substring(4, profileDetails.length());
+                Log.d(Utilities.LOGGING + "profileDetails", profileDetails);
+                editor.putString("profileDetails",profileDetails);
+                editor.apply();
+                JSONObject profileJSON = new JSONObject(profileDetails);
+                JSONObject message = profileJSON.getJSONObject("message");
+                String user_type =message.getString("user_type");
+                editor.putString("user_type",user_type);
+                editor.apply();
+            }catch(Exception e) {
+                Log.d(Utilities.LOGGING,e+"");
+            }
+            editor.apply();
+        }
     }
     public class AsyncgetallProfile extends AsyncTask<Void,Void,String> {
 
@@ -515,6 +516,12 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            allprofileDetails = s;
+            SharedPreferences.Editor editor = prefs.edit();
+            Log.d(Utilities.LOGGING,"allProfileDetails :  "+allprofileDetails);
+            if(allprofileDetails!=null&&!allprofileDetails.equals(""))
+                editor.putString("allprofileDetails",allprofileDetails);
+            editor.apply();
             pd.dismiss();
         }
     }
@@ -585,6 +592,15 @@ public class LoginActivity extends AppCompatActivity {
             }
             Log.d(Utilities.LOGGING,result);
             return result;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            SharedPreferences.Editor editor = prefs.edit();
+            String alltasks = s;
+            editor.putString("alltasks",alltasks);
+            editor.apply();
         }
     }
 
