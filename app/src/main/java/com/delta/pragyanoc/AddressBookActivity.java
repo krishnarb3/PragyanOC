@@ -54,14 +54,14 @@ public class AddressBookActivity extends AppCompatActivity {
              JSONObject profileJSON = new JSONObject(profileDetails);
              String user_type =((JSONObject)profileJSON.get("message")).getString("user_type");
              editor.putString("user_type",user_type);
-             editor.commit();
+             editor.apply();
             if(profileDetails!=null&&!profileDetails.equals(""))
                 editor.putString("profileDetails",profileDetails);
-            editor.commit();
+            editor.apply();
             allprofileDetails = prefs.getString("allprofileDetails","");
             if(!allprofileDetails.equals(""))
                 editor.putString("allprofileDetails",allprofileDetails);
-            editor.commit();
+            editor.apply();
             JSONObject allprofileJSON = new JSONObject(allprofileDetails);
             Log.d(Utilities.LOGGING,allprofileJSON.toString());
             JSONArray profileArrays = allprofileJSON.getJSONArray("message");

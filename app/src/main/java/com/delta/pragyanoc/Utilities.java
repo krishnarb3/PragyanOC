@@ -16,6 +16,9 @@ public class Utilities {
     private static String GET_CHAT_URL = "http://api.pragyan.org/oc/task/chat/read";
     private static String ASSIGN_TO_TASK_URL = "http://api.pragyan.org/oc/task/assign";
     private static String UPDATE_TASK_STATUS_URL = "http://api.pragyan.org/oc/task/status/update";
+    public static String UPDATE_TASK_URL ="http://api.pragyan.org/oc/task/update";
+    public static String DELETE_TASK_URL ="http://api.pragyan.org/oc/task/delete";
+
     public static String LOGGING = "LOGGING";
 
     public static String getUpdateTaskStatusUrl() {

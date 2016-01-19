@@ -1,5 +1,6 @@
 package com.delta.pragyanoc;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -53,7 +54,7 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
             allTasks = new AsyncGetAllTasks().execute().get();
             SharedPreferences.Editor editor = prefs.edit();
             editor.putString("allTasks",allTasks);
-            editor.commit();
+            editor.apply();
             allTasks = prefs.getString("allTasks","");
             JSONObject alltasksObject = new JSONObject(allTasks);
             final JSONArray message = alltasksObject.getJSONArray("message");
@@ -84,6 +85,45 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
             CustomTaskAdapter customTaskAdapter = new CustomTaskAdapter(this,taskNames,taskAssignees,taskStatus);
             listView.setAdapter(customTaskAdapter);
             final String user_roll = prefs.getString("user_roll","");
+            listView.setOnItemLongClickListener(
+                    new AdapterView.OnItemLongClickListener() {
+                        @Override
+                        public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                            final AlertDialog.Builder dialog = new AlertDialog.Builder(TaskAcc2TeamActivity.this);
+                            dialog.setTitle("Update/Delete");
+                            dialog.setMessage("Do you want to Delete or Update");
+                            dialog.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Task task = tasksArray.get(position);
+                                    String task_name = task.task_name;
+                                    String task_id = task.task_id;
+                                    String team_id = task.team_id;
+                                    Intent intent = new Intent(TaskAcc2TeamActivity.this, NewTaskActivity.class);
+                                    intent.putExtra("task_name", task_name);
+                                    intent.putExtra("task_id", task_id);
+                                    intent.putExtra("team_id", team_id);
+                                    intent.putExtra("intentType","1");
+                                    startActivity(intent);
+                                }
+                            });
+                            dialog.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Task task = tasksArray.get(position);
+                                    String task_id = task.task_id;
+                                    Intent intent = new Intent(TaskAcc2TeamActivity.this, NewTaskActivity.class);
+                                    intent.putExtra("task_id", task_id);
+                                    intent.putExtra("intentType","2");
+                                    startActivity(intent);
+
+                                }
+                            });
+                            dialog.show();
+                            return true;
+                        }
+                    }
+            );
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view,final int i, long l) {
@@ -133,7 +173,7 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
                                         }
                                         if(isPresent||user_type.equals("0")||user_type.equals("1")) {
                                             Log.d(Utilities.LOGGING,"Updating"+tasksArray.get(i).task_id+"withstatus"+task_status);
-                                            String res = new AsyncUpdateTaskStatus().execute(tasksArray.get(i).task_id,task_status).get();
+                                            String res = new AsyncUpdateTaskStatus().execute(tasksArray.get(i).task_id,task_status,team_id,prefs.getString("user_roll",""),prefs.getString("user_secret","")).get();
                                         }
                                         else {
                                             Toast.makeText(TaskAcc2TeamActivity.this, "You dont have Permissions", Toast.LENGTH_LONG).show();
@@ -181,13 +221,6 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
         });
     }
 
-    public class Task {
-        public String task_id;
-        public String task_name;
-        public String task_completed;
-        public String team_id;
-        public String team_name;
-    }
 
     public class AsyncgetTargetUserTasks extends AsyncTask<String,Void,String> {
 
@@ -279,80 +312,6 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
             Map<String, String> params = new HashMap<>();
             params.put("user_roll",user_roll);
             params.put("user_secret",user_secret);
-            Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
-            while(iterator.hasNext()) {
-                Map.Entry<String, String> param = iterator.next();
-                bodyBuilder.append(param.getKey()).append('=')
-                        .append(param.getValue());
-                if (iterator.hasNext()) {
-                    bodyBuilder.append('&');
-                }
-            }
-            String body = bodyBuilder.toString();
-            Log.v(Utilities.LOGGING,"Posting '"+body+"' to "+url);
-            byte[] bytes = body.getBytes();
-            HttpURLConnection conn = null;
-            try {
-                Log.d("URL", "> " + url);
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setDoOutput(true);
-                conn.setUseCaches(false);
-                conn.setFixedLengthStreamingMode(bytes.length);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type",
-                        "application/x-www-form-urlencoded;charset=UTF-8");
-                OutputStream out = conn.getOutputStream();
-                out.write(bytes);
-                out.close();
-                InputStream in = conn.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                CharSequence charSequence = "status";
-                String line = null;
-                try {
-                    while ((line = reader.readLine()) != null) {
-                        result = result + line;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        in.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            catch(Exception e) {
-                Log.e(Utilities.LOGGING, e + "");
-            }
-            Log.d(Utilities.LOGGING,result);
-            return result;
-        }
-    }
-
-    public class AsyncUpdateTaskStatus extends AsyncTask<String,Void,String> {
-        @Override
-        protected String doInBackground(String... strings) {
-            String user_roll = prefs.getString("user_roll","");
-            String user_secret = prefs.getString("user_secret","");
-            String task_id = strings[0];
-            String task_completed = strings[1];
-            URL url;
-            String result="";
-            try {
-                url = new URL(Utilities.getUpdateTaskStatusUrl());
-            }
-            catch(MalformedURLException e) {
-                throw new IllegalArgumentException("invalid url: " + Utilities.getGcmUrl());
-            }
-            StringBuilder bodyBuilder = new StringBuilder();
-            Map<String, String> params = new HashMap<>();
-            params.put("user_roll",user_roll);
-            params.put("user_secret",user_secret);
-            params.put("team_id",team_id);
-            params.put("task_id",task_id);
-            params.put("task_status",task_completed);
             Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
             while(iterator.hasNext()) {
                 Map.Entry<String, String> param = iterator.next();
