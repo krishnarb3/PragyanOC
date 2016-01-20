@@ -61,7 +61,7 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
             final ArrayList<Task> tasksArray = new ArrayList<>();
             ArrayList<String> taskDisplay = new ArrayList<>();
             ArrayList<String> taskNames = new ArrayList<>();
-            ArrayList<String> taskAssignees = new ArrayList<>();
+            final ArrayList<String> taskAssignees = new ArrayList<>();
             ArrayList<String> taskStatus = new ArrayList<>();
             for(int i=0;i<message.length();i++) {
                 JSONObject taskObject = message.getJSONObject(i);
@@ -114,6 +114,7 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
                                     Intent intent = new Intent(TaskAcc2TeamActivity.this, NewTaskActivity.class);
                                     intent.putExtra("task_id", task_id);
                                     intent.putExtra("intentType","2");
+                                    intent.putExtra("task_assignees",taskAssignees);
                                     startActivity(intent);
 
                                 }
@@ -168,6 +169,7 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
                                             case 3: Intent intent = new Intent(TaskAcc2TeamActivity.this,ChatActivity.class);
                                                     intent.putExtra("task_id",tasksArray.get(i).task_id);
                                                     startActivity(intent);
+                                                    throw new Exception("e");
                                             default: task_status = "1";break;
                                         }
                                         if(isPresent||user_type.equals("0")||user_type.equals("1")) {

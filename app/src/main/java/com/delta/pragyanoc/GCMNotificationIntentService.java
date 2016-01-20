@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
@@ -62,10 +61,13 @@ public class GCMNotificationIntentService extends IntentService {
         try {
             JSONObject messages = new JSONObject(message);
             String type = messages.getString("type");
-            Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
             JSONObject msg = messages.getJSONObject("message");
-            String taskName = msg.getString("task_name");
-
+            String taskName;
+            try {
+                taskName = msg.getString("task_name");
+            }catch (Exception e) {
+                taskName = "";
+            }
             sendNotification(type,taskName);
 
         } catch (JSONException e) {

@@ -84,6 +84,51 @@ public class NewTaskActivity extends AppCompatActivity {
             editText.setText(task_name);
             editTextAssignees.setVisibility(View.GONE);
             FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+            final ArrayList<String> arrayList = new ArrayList<>();
+            //String rollnos = editTextAssignees.getText().toString();
+            String allprofileDetails = prefs.getString("allprofileDetails", "");
+            Log.d(Utilities.LOGGING,"allProfileDetails : "+allprofileDetails);
+            try {
+                JSONObject allprofileJSON = new JSONObject(allprofileDetails);
+                JSONArray profileArrays = allprofileJSON.getJSONArray("message");
+                for (int i = 0; i < profileArrays.length(); i++) {
+                    JSONObject jsonObject = (JSONObject) profileArrays.get(i);
+                    User user = new User();
+                    user.user_name = jsonObject.getString("user_name");
+                    user.user_roll = jsonObject.getString("user_roll");
+                    user.user_phone = jsonObject.getString("user_phone");
+                    user.user_type = jsonObject.getString("user_type");
+                    user.user_teams = jsonObject.getJSONArray("teams").toString();
+                    userArray.add(user);
+                    String year;
+                    if (user.user_type.equals("0"))
+                        year = "4th Year";
+                    else if (user.user_type.equals("1"))
+                        year = "3rd year";
+                    else
+                        year = "2nd year";
+                    JSONArray team_ids = new JSONArray(user.user_teams);
+                    boolean iscontains = false;
+                    for (int t = 0; t < team_ids.length(); t++)
+                        if (team_ids.get(t).equals(team_id))
+                            iscontains = true;
+                    if (iscontains)
+                        arrayList.add(user.user_name + " | " + user.user_phone + " | " + year);
+                }
+                final ContactAdapter adapter = new ContactAdapter(NewTaskActivity.this, userArray);
+                assigneesList.setAdapter(adapter);
+                assigneesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        view.setBackgroundColor(getResources().getColor(R.color.colorTaskCompleted));
+                        rollnos.add(userArray.get(i).user_roll);
+                    }
+                });
+
+
+            } catch(Exception e) {
+                Log.d(Utilities.LOGGING,e+"");
+            }
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -158,6 +203,7 @@ public class NewTaskActivity extends AppCompatActivity {
                             String result = new AsyncCreateNewTask().execute(user_roll, user_secret, team_id, task, "").get();
                             JSONObject resultJSON = new JSONObject(result.substring(4, result.length()));
                             String task_id = ((JSONObject) resultJSON.get("message")).getString("task_id");
+                            rollnos.add(prefs.getString("user_roll",""));
                             Set<String> uniqueAssignees = new HashSet<String>(rollnos);
                             ArrayList<String> uniqueAssigneesArrayList = new ArrayList<String>(uniqueAssignees);
                             String assignees = "";

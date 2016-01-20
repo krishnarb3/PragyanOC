@@ -35,6 +35,7 @@ public class ChatActivity extends AppCompatActivity {
 
     SharedPreferences prefs;
     ArrayList<String> arrayList;
+    EditText editText;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +50,7 @@ public class ChatActivity extends AppCompatActivity {
         Log.d(Utilities.LOGGING,task_id);
         final String user_roll = prefs.getString("user_roll","");
         final String user_secret = prefs.getString("user_secret","");
-        final EditText editText = (EditText) findViewById(R.id.newchat);
+        editText = (EditText) findViewById(R.id.newchat);
         getMessagesFromLocal(user_roll,user_secret,task_id);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -59,6 +60,11 @@ public class ChatActivity extends AppCompatActivity {
                 String msg = editText.getText().toString();
                 try {
                     String res = new AsyncSendMessage().execute(user_roll, user_secret,task_id, msg).get();
+                    if(res!=null&&!res.equals("")) {
+                        editText.setText("");
+                        Snackbar.make(view, "Error occurred , Try later", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    }
                 } catch (Exception e) {
                     Snackbar.make(view, "Error occurred , Try later", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
