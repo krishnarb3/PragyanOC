@@ -111,71 +111,72 @@ public class LoginActivity extends AppCompatActivity {
         String result;
         @Override
         protected String doInBackground(String... strings) {
-            user_roll = strings[0];
-            user_password = strings[1];
-            URL url;
             try {
-                url = new URL(Utilities.getLoginUrl());
-            }
-            catch(MalformedURLException e) {
-                throw new IllegalArgumentException("invalid url: " + Utilities.getGcmUrl());
-            }
-            StringBuilder bodyBuilder = new StringBuilder();
-            Map<String, String> params = new HashMap<>();
-            params.put("user_roll",user_roll);
-            params.put("user_password",user_password);
-            Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
-            while(iterator.hasNext()) {
-                Map.Entry<String, String> param = iterator.next();
-                bodyBuilder.append(param.getKey()).append('=')
-                        .append(param.getValue());
-                if (iterator.hasNext()) {
-                    bodyBuilder.append('&');
-                }
-            }
-            String body = bodyBuilder.toString();
-            Log.v(Utilities.LOGGING,"Posting '"+body+"' to "+url);
-            byte[] bytes = body.getBytes();
-            HttpURLConnection conn = null;
-            try {
-                Log.d("URL", "> " + url);
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setDoOutput(true);
-                conn.setUseCaches(false);
-                conn.setFixedLengthStreamingMode(bytes.length);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type",
-                        "application/x-www-form-urlencoded;charset=UTF-8");
-                OutputStream out = conn.getOutputStream();
-                out.write(bytes);
-                out.close();
-                InputStream in = conn.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                CharSequence charSequence = "status";
-                String line = null;
+                user_roll = strings[0];
+                user_password = strings[1];
+                URL url;
                 try {
-                    while ((line = reader.readLine()) != null) {
-                        result = result + line;
+                    url = new URL(Utilities.getLoginUrl());
+                } catch (MalformedURLException e) {
+                    throw new IllegalArgumentException("invalid url: " + Utilities.getGcmUrl());
+                }
+                StringBuilder bodyBuilder = new StringBuilder();
+                Map<String, String> params = new HashMap<>();
+                params.put("user_roll", user_roll);
+                params.put("user_password", user_password);
+                Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry<String, String> param = iterator.next();
+                    bodyBuilder.append(param.getKey()).append('=')
+                            .append(param.getValue());
+                    if (iterator.hasNext()) {
+                        bodyBuilder.append('&');
                     }
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString("user_roll",user_roll);
-                    editor.putString("user_password",user_password);
-                    editor.apply();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
+                }
+                String body = bodyBuilder.toString();
+                Log.v(Utilities.LOGGING, "Posting '" + body + "' to " + url);
+                byte[] bytes = body.getBytes();
+                HttpURLConnection conn = null;
+                try {
+                    Log.d("URL", "> " + url);
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setDoOutput(true);
+                    conn.setUseCaches(false);
+                    conn.setFixedLengthStreamingMode(bytes.length);
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type",
+                            "application/x-www-form-urlencoded;charset=UTF-8");
+                    OutputStream out = conn.getOutputStream();
+                    out.write(bytes);
+                    out.close();
+                    InputStream in = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    CharSequence charSequence = "status";
+                    String line = null;
                     try {
-                        in.close();
+                        while ((line = reader.readLine()) != null) {
+                            result = result + line;
+                        }
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString("user_roll", user_roll);
+                        editor.putString("user_password", user_password);
+                        editor.apply();
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } finally {
+                        try {
+                            in.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
+                } catch (Exception e) {
+                    Log.e(Utilities.LOGGING, e + "");
                 }
+                Log.d(Utilities.LOGGING, result);
+            } catch(Exception e) {
+                Log.d(Utilities.LOGGING,e+"");
             }
-
-            catch(Exception e) {
-                Log.e(Utilities.LOGGING, e + "");
-            }
-            Log.d(Utilities.LOGGING,result);
             return result;
         }
 

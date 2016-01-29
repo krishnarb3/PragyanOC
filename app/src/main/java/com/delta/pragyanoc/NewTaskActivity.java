@@ -39,6 +39,7 @@ public class NewTaskActivity extends AppCompatActivity {
     SharedPreferences prefs;
     String team_id, type, task_id, task_name;
     ArrayList<User> userArray;
+    ArrayList<User> userDisplayArray;
     ArrayList<String> rollnos;
 
     @Override
@@ -46,6 +47,7 @@ public class NewTaskActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_task);
         userArray = new ArrayList<>();
+        userDisplayArray = new ArrayList<>();
         rollnos = new ArrayList<>();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -66,10 +68,10 @@ public class NewTaskActivity extends AppCompatActivity {
             try {
                 String result = new AsyncCreateNewTask().execute(user_roll, user_secret, team_id, task_id, "").get();
                 Log.d("cruz", result);
-                JSONObject success = new JSONObject(result);
+                JSONObject success = new JSONObject(result.substring(4,result.length()));
                 String status = success.getString("status_code");
                 if (status.equals("200")) {
-                    Toast.makeText(this, "Successfully Deleted", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Successfully Deleted\nPlease open this activity again", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(this, "Deletion Failed. Try Again Later.", Toast.LENGTH_SHORT).show();
                 }
@@ -101,9 +103,9 @@ public class NewTaskActivity extends AppCompatActivity {
                     user.user_teams = jsonObject.getJSONArray("teams").toString();
                     userArray.add(user);
                     String year;
-                    if (user.user_type.equals("0"))
+                    if (user.user_type.equals("0")||user.user_type.equals("1"))
                         year = "4th Year";
-                    else if (user.user_type.equals("1"))
+                    else if (user.user_type.equals("2"))
                         year = "3rd year";
                     else
                         year = "2nd year";
@@ -112,16 +114,19 @@ public class NewTaskActivity extends AppCompatActivity {
                     for (int t = 0; t < team_ids.length(); t++)
                         if (team_ids.get(t).equals(team_id))
                             iscontains = true;
-                    if (iscontains)
-                        arrayList.add(user.user_name + " | " + user.user_phone + " | " + year);
+                    if (iscontains) {
+                        arrayList.add(user.user_name + " | " + user.user_phone + " | " + year + " | " + user.user_teams.toString());
+                        Log.d(Utilities.LOGGING,user.user_name+" - "+user.user_teams+"\n");
+                        userDisplayArray.add(user);
+                    }
                 }
-                final ContactAdapter adapter = new ContactAdapter(NewTaskActivity.this, userArray);
+                final ContactAdapter adapter = new ContactAdapter(NewTaskActivity.this, userDisplayArray);
                 assigneesList.setAdapter(adapter);
                 assigneesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                         view.setBackgroundColor(getResources().getColor(R.color.colorTaskCompleted));
-                        rollnos.add(userArray.get(i).user_roll);
+                        rollnos.add(userDisplayArray.get(i).user_roll);
                     }
                 });
 
@@ -136,7 +141,7 @@ public class NewTaskActivity extends AppCompatActivity {
                     String result;
                     try {
                         result = new AsyncCreateNewTask().execute(user_roll, user_secret, team_id, task_id, task).get();
-                        JSONObject success = new JSONObject(result);
+                        JSONObject success = new JSONObject(result.substring(4,result.length()));
                         String status = success.getString("status_code");
                         if (status.equals("200")) {
                             Toast.makeText(NewTaskActivity.this, "Successfully Updated", Toast.LENGTH_SHORT).show();
@@ -170,9 +175,9 @@ public class NewTaskActivity extends AppCompatActivity {
                     user.user_teams = jsonObject.getJSONArray("teams").toString();
                     userArray.add(user);
                     String year;
-                    if (user.user_type.equals("0"))
+                    if (user.user_type.equals("0")||user.user_type.equals("1"))
                         year = "4th Year";
-                    else if (user.user_type.equals("1"))
+                    else if (user.user_type.equals("2"))
                         year = "3rd year";
                     else
                         year = "2nd year";
@@ -181,18 +186,20 @@ public class NewTaskActivity extends AppCompatActivity {
                     for(int t=0;t<team_ids.length();t++)
                         if(team_ids.get(t).equals(team_id))
                             iscontains = true;
-                    if(iscontains)
+                    if(iscontains) {
                         arrayList.add(user.user_name + " | " + user.user_phone + " | " + year);
+                        userDisplayArray.add(user);
+                    }
                 }
                 editTextAssignees.setVisibility(View.GONE);
                 final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-                final ContactAdapter adapter = new ContactAdapter(NewTaskActivity.this, userArray);
+                final ContactAdapter adapter = new ContactAdapter(NewTaskActivity.this, userDisplayArray);
                 assigneesList.setAdapter(adapter);
                 assigneesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                         view.setBackgroundColor(getResources().getColor(R.color.colorTaskCompleted));
-                        rollnos.add(userArray.get(i).user_roll);
+                        rollnos.add(userDisplayArray.get(i).user_roll);
                     }
                 });
                 fab.setOnClickListener(new View.OnClickListener() {

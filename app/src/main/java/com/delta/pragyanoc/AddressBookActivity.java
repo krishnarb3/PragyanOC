@@ -72,11 +72,12 @@ public class AddressBookActivity extends AppCompatActivity {
                 user.user_roll = jsonObject.getString("user_roll");
                 user.user_phone = jsonObject.getString("user_phone");
                 user.user_type = jsonObject.getString("user_type");
+                Log.d(Utilities.LOGGING,user.user_type);
                 userArray.add(user);
                 String year;
-                if(user.user_type.equals("0"))
+                if(user.user_type.equals("0")||user.user_type.equals("1"))
                     year = "4th Year";
-                else if(user.user_type.equals("1"))
+                else if(user.user_type.equals("2"))
                     year = "3rd year";
                 else
                     year = "2nd year";

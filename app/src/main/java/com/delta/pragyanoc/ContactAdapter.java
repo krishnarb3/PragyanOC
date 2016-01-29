@@ -24,7 +24,14 @@ public class ContactAdapter extends ArrayAdapter{
         LayoutInflater inflater = LayoutInflater.from(getContext());
         final View view = inflater.inflate(R.layout.adapter,parent,false);
         TextView name = (TextView)view.findViewById(R.id.textView_task_name);
-        name.setText(users.get(position).user_name);
+        String year;
+        if(users.get(position).user_type.equals("0")||users.get(position).user_type.equals("1"))
+            year = "4th Year";
+        else if(users.get(position).user_type.equals("2"))
+            year = "3rd Year";
+        else
+            year = "2nd Year";
+        name.setText(users.get(position).user_name+" - "+year);
         return view;
     }
 }

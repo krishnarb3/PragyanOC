@@ -35,9 +35,11 @@ import java.util.Map;
 
 public class TaskAcc2TeamActivity extends AppCompatActivity {
     String allTasks;
+    String allProfileDetails;
     String team_id;
     String team_name;
     SharedPreferences prefs;
+    Map<String,String> user_roll_name_map;
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,10 +47,22 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Bundle bundle = getIntent().getExtras();
+        user_roll_name_map = new HashMap<>();
         team_id = bundle.getString("team_id");
         team_name = bundle.getString("team_name");
         prefs = getSharedPreferences("UserDetails",
                 Context.MODE_PRIVATE);
+        allProfileDetails = prefs.getString("allprofileDetails","");
+        try {
+            JSONObject allProfileDetailsObject = new JSONObject(allProfileDetails);
+            JSONArray message = allProfileDetailsObject.getJSONArray("message");
+            for(int i=0;i<message.length();i++) {
+                JSONObject user = message.getJSONObject(i);
+                user_roll_name_map.put(user.getString("user_roll"),user.getString("user_name"));
+            }
+        }catch(Exception e) {
+            Log.d(Utilities.LOGGING,e+"");
+        }
         try {
             allTasks = new AsyncGetAllTasks().execute().get();
             SharedPreferences.Editor editor = prefs.edit();
@@ -65,6 +79,7 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
             ArrayList<String> taskStatus = new ArrayList<>();
             for(int i=0;i<message.length();i++) {
                 JSONObject taskObject = message.getJSONObject(i);
+                Log.d(Utilities.LOGGING,taskObject.toString());
                 Task task = new Task();
                 task.team_name = taskObject.getString("team_name");
                 task.team_id = taskObject.getString("team_id");
@@ -72,7 +87,15 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
                 task.task_id = taskObject.getString("task_id");
                 task.task_name = taskObject.getString("task_name");
                 JSONArray task_assignees_json = taskObject.getJSONArray("assigned");
-                taskAssignees.add(task_assignees_json.toString());
+                String assignees="";
+                for(int t=0;t<task_assignees_json.length();t++) {
+                    if(user_roll_name_map.containsKey(task_assignees_json.get(t).toString()))
+                        assignees = assignees.concat(user_roll_name_map.get(task_assignees_json.get(t).toString())+" , ");
+                    else
+                        assignees = assignees.concat(task_assignees_json.get(t).toString()+" , ");
+
+                }
+                taskAssignees.add(assignees);
                 if(team_id.equals(task.team_id)) {
                     taskNames.add(task.task_name);
                     taskStatus.add(task.task_completed);
@@ -116,7 +139,7 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
                                     intent.putExtra("intentType","2");
                                     intent.putExtra("task_assignees",taskAssignees);
                                     startActivity(intent);
-
+                                    finish();
                                 }
                             });
                             dialog.show();
@@ -294,6 +317,13 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
             Log.d(Utilities.LOGGING,result);
             return result;
         }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            if(s==null)
+                Toast.makeText(TaskAcc2TeamActivity.this,"Connection Error",Toast.LENGTH_SHORT).show();
+        }
     }
 
     public class AsyncGetAllTasks extends AsyncTask<Void,Void,String> {
@@ -363,6 +393,13 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
             }
             Log.d(Utilities.LOGGING,result);
             return result;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            if(s==null)
+                Toast.makeText(TaskAcc2TeamActivity.this,"Connection Error",Toast.LENGTH_SHORT).show();
         }
     }
 

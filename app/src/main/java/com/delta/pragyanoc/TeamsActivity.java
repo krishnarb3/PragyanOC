@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -13,6 +11,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -52,6 +51,7 @@ public class TeamsActivity extends AppCompatActivity {
                 team_show.add(team.getString("team_name")+ " - "+team.getString("team_id"));
             }
         }catch(Exception e) {
+            Toast.makeText(TeamsActivity.this,"Error Occurred",Toast.LENGTH_SHORT).show();
             Log.e(Utilities.LOGGING,e+"");
         }
         ArrayAdapter<String> adapter;
@@ -66,14 +66,6 @@ public class TeamsActivity extends AppCompatActivity {
                 intent.putExtra("team_id",teamids.get(i));
                 intent.putExtra("team_name",teamnames.get(i));
                 startActivity(intent);
-            }
-        });
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
             }
         });
     }

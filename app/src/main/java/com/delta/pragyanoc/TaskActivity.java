@@ -338,6 +338,7 @@ public class TaskActivity extends AppCompatActivity {
             }
 
             catch(Exception e) {
+                Toast.makeText(TaskActivity.this,"Connection Error",Toast.LENGTH_SHORT).show();
                 Log.e(Utilities.LOGGING, e + "");
             }
             Log.d(Utilities.LOGGING,result);
