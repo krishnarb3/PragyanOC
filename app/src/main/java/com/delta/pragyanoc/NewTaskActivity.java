@@ -125,6 +125,7 @@ public class NewTaskActivity extends AppCompatActivity {
                 assigneesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        Log.d(Utilities.LOGGING,userDisplayArray.get(i).user_name);
                         view.setBackgroundColor(getResources().getColor(R.color.colorTaskCompleted));
                         rollnos.add(userDisplayArray.get(i).user_roll);
                     }
@@ -198,6 +199,7 @@ public class NewTaskActivity extends AppCompatActivity {
                 assigneesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        Log.d(Utilities.LOGGING,userDisplayArray.get(i).user_name);
                         view.setBackgroundColor(getResources().getColor(R.color.colorTaskCompleted));
                         rollnos.add(userDisplayArray.get(i).user_roll);
                     }

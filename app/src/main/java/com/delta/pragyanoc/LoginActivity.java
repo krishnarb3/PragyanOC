@@ -183,10 +183,10 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            String login;
-            login = s;
-            login = login.substring(4,login.length());
             try {
+                String login;
+                login = s;
+                login = login.substring(4,login.length());
                 JSONObject loginJSON = new JSONObject(login);
                 int status = (int) loginJSON.get("status_code");
                 user_secret = loginJSON.get("message").toString();

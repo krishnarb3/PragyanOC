@@ -93,17 +93,19 @@ public class TaskAcc2TeamActivity extends AppCompatActivity {
                         assignees = assignees.concat(user_roll_name_map.get(task_assignees_json.get(t).toString())+" , ");
                     else
                         assignees = assignees.concat(task_assignees_json.get(t).toString()+" , ");
-
+                    Log.d(Utilities.LOGGING,"assignees"+assignees);
                 }
-                taskAssignees.add(assignees);
                 if(team_id.equals(task.team_id)) {
                     taskNames.add(task.task_name);
                     taskStatus.add(task.task_completed);
                     tasksArray.add(task);
                     taskDisplay.add(task.task_name + " - ");
+                    taskAssignees.add(assignees);
                 }
             }
+
             ListView listView = (ListView)findViewById(R.id.listview);   //TODO MAKE CUSTOM ADAPTER TO HANDLE BACKGROUND COLOR CHANGE
+            Log.d(Utilities.LOGGING,taskAssignees.toString());
             CustomTaskAdapter customTaskAdapter = new CustomTaskAdapter(this,taskNames,taskAssignees,taskStatus);
             listView.setAdapter(customTaskAdapter);
             final String user_roll = prefs.getString("user_roll","");

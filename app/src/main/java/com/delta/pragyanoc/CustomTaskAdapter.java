@@ -1,6 +1,7 @@
 package com.delta.pragyanoc;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,7 @@ public class CustomTaskAdapter extends ArrayAdapter<String> {
         TextView name = (TextView)view.findViewById(R.id.textView_task_name);
         name.setText(tasknames.get(position));
         TextView assignees = (TextView)view.findViewById(R.id.textView_task_assignees);
+        Log.d(Utilities.LOGGING,taskassignees.get(position));
         assignees.setText(taskassignees.get(position));
         if(task_status.get(position).equals("0"))
             view.setBackgroundColor(getContext().getResources().getColor(R.color.colorTaskIncomplete));
